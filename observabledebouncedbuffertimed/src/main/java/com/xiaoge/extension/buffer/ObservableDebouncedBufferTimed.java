@@ -29,7 +29,7 @@ import io.reactivex.plugins.RxJavaPlugins;
  * 使用三个维度进行消息发送控制
  *
  * debounce维度, 收到消息一定时间没有新消息后触发更新, debounce 导致的延时不超过window
- * window维度,定时更新  window > debounce
+ * window维度,定时更新  window > debounc
  * sizeboundary, 收到指定数量的消息后更新
  *
  * 简化复杂度:
@@ -127,14 +127,14 @@ public final class ObservableDebouncedBufferTimed<T, U extends Collection<? supe
                 } catch (Throwable e) {
                     Exceptions.throwIfFatal(e);
                     s.dispose();
-                    EmptyDisposable.error(e, actual);
+                    EmptyDisposable.error(e, downstream);
                     w.dispose();
                     return;
                 }
 
                 buffer = b;
 
-                actual.onSubscribe(this);
+                downstream.onSubscribe(this);
 
                 timer = w.schedulePeriodically(this, timespan, timespan, unit);
             }
@@ -171,7 +171,7 @@ public final class ObservableDebouncedBufferTimed<T, U extends Collection<? supe
                 b = ObjectHelper.requireNonNull(bufferSupplier.call(), "The buffer supplied is null");
             } catch (Throwable e) {
                 Exceptions.throwIfFatal(e);
-                actual.onError(e);
+                downstream.onError(e);
                 dispose();
                 return;
             }
@@ -210,7 +210,7 @@ public final class ObservableDebouncedBufferTimed<T, U extends Collection<? supe
             synchronized (this) {
                 buffer = null;
             }
-            actual.onError(t);
+            downstream.onError(t);
             w.dispose();
 
             if (debounceDone) {
@@ -236,7 +236,7 @@ public final class ObservableDebouncedBufferTimed<T, U extends Collection<? supe
             queue.offer(b);
             done = true;
             if (enter()) {
-                QueueDrainHelper.drainLoop(queue, actual, false, this, this);
+                QueueDrainHelper.drainLoop(queue, downstream, false, this, this);
             }
 
             if (debounceDone) {
@@ -286,7 +286,7 @@ public final class ObservableDebouncedBufferTimed<T, U extends Collection<? supe
             } catch (Throwable e) {
                 Exceptions.throwIfFatal(e);
                 dispose();
-                actual.onError(e);
+                downstream.onError(e);
                 return;
             }
 
