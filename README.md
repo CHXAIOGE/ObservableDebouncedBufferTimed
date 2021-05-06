@@ -57,3 +57,26 @@ timeSkip, unbounded buffer
                 }));
 
     }
+    
+    /**
+     * @param source   observableSource
+     * @param timeSpan the period of time each buffer collects items before it is emitted and replaced with a new
+     *                 buffer
+     * @param unit     the unit of time which applies to the {@code timespan} and  {@code timeout}argument
+     * @param count    the maximum size of each buffer before it is emitted
+     * @param timeout  the time each item has to be "the most recent" of those emitted by the source ObservableSource to
+     *                 ensure that it's not dropped like debounce
+     */
+    private Observable<List<Integer>> debounceBuffer(Observable source, long timeSpan, TimeUnit unit,
+                                                     int count, long timeout) {
+        ObjectHelper.requireNonNull(source, "source is null");
+        ObjectHelper.requireNonNull(unit, "unit is null");
+
+        if (ObjectHelper.compare(timeSpan, timeout) <= 0) {
+            throw new IllegalArgumentException("timespan(" + timeSpan + ") > timeout(" + timeout + ") required but it was not.");
+        }
+        return RxJavaPlugins.onAssembly(new ObservableDebouncedBufferTimed<>(source,
+                timeSpan, unit, Schedulers.computation(),
+                ArrayListSupplier.<Integer>asCallable(), count,
+                true, timeout));
+    }
