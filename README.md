@@ -31,3 +31,29 @@ Just for Simplify:
 [Unsupported Operations]
 
 timeSkip, unbounded buffer
+
+<b>API Usage:</b>
+
+    private CompositeDisposable disposable = new CompositeDisposable();
+
+    public void example() {
+        PublishSubject<Integer> source = PublishSubject.create();
+        source.subscribeOn(Schedulers.single()).observeOn(AndroidSchedulers.mainThread()).onTerminateDetach();
+        Observable<List<Integer>> observableBuffer = debounceBuffer(source, 3000, TimeUnit.MILLISECONDS, 100, 500);
+        disposable.add(observableBuffer
+                .observeOn(Schedulers.io())
+                .onTerminateDetach()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<Integer>>() {
+                    @Override
+                    public void accept(List<Integer> list) throws Exception {
+                        //data process
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        //data process
+                    }
+                }));
+
+    }
