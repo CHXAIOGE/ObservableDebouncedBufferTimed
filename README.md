@@ -2,16 +2,32 @@
 
 RxJava buffer operator extension
 
-自定义Observable,扩展buffer 操作符的功能
+More flexible for certain condition like { Messages Receive And Update UI}
 
-使用三个维度进行消息发送控制
+Use Three Dimension for Events control
 
-debounce维度, 收到消息一定时间没有新消息后触发更新, debounce 导致的延时不超过window
+(1) debounce
 
-window维度,定时更新  window > debounce
+Just like timeout. which emit data if no more event buffered.
 
-sizeboundary, 收到指定数量的消息后更新
+收到消息一定时间没有新消息后触发更新, debounce 导致的延时不超过window
 
-简化复杂度:
+(2) window
 
-不支持timeSkip,不支持unbounded buffer
+emit data with a certain time,
+
+[can be reset by 【debounce】 or 【sizeBoundary】 emits]
+
+定时更新  window > debounce
+
+(3) sizeBoundary
+
+emit data if reach limit
+
+收到指定数量的消息后更新,达到存储上限
+
+Just for Simplify:
+
+[Unsupported Operations]
+
+timeSkip, unbounded buffer
